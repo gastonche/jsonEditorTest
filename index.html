@@ -1,0 +1,82 @@
+<html>
+	<head>
+	<link rel="stylesheet" type="text/css" href="advanced-mode.css">
+	</head>
+	<body>
+	<h2>Validation Results <span class="resultats"></span></h2>
+
+	<div id="results">
+
+	</div>
+	<script type="text/javascript" src="advanced-mode.js"></script>
+	<script type="text/javascript" src="tomorrow_night_bright.js"></script>
+	<script type="text/javascript" src="jsonschema-ui.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ajv/4.4.0/ajv.min.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+
+			$.get({
+					url:"json.json",
+					success: function(schema){
+						var ajv = new Ajv({ allErrors: true, verbose: true});
+						var options = {
+				            mode:'code',
+				            theme: 'ace/theme/tomorrow_night_bright',
+				            indentation: 4,
+				            schema: schema,
+				            ajv: ajv,
+				            onEditable: function(node){
+				                return true;
+				            },
+				            onChange:function() {
+				               var valid;
+				                try{
+				                    valid = editor.validateSchema(editor.get());
+				                }catch (e){
+				                    valid = false;
+				                }
+				                $(".resultats").append(" "+valid);
+				            },
+				        }
+
+				        var editor = new advancedJSONEditor(document.getElementById("results"), options);
+				        editor.aceEditor.setOptions({
+				            fontSize: 14,
+				            showInvisibles: true
+				        });
+
+				        var advanced = $("#results");
+				        // remove powered by ace link
+				        advanced.find('.jsoneditor-menu a').remove();
+				        // add  listener to .screen-mode button for toggleScreenMode
+				        // add controls to the editor header
+				        advanced.find('.jsoneditor-menu')
+				            .append($('<a href="javascript:;" class="jsoneditor-exit screen-mode"><img class="icon" src="http://localhost:8000/static/admin/img/icon-deletelink.svg" /> back to normal mode</a>').click(function(){
+						        	var valid;
+					                try{
+					                    valid = editor.validateSchema(editor.get());
+					                }catch (e){
+					                    valid = false;
+					                }
+						        	alert(valid)
+						        }))
+				            .append(advanced.parents('.field-config').find('#netjsonconfig-hint')
+				                .clone(true)
+				                .attr('id','netjsonconfig-hint-advancedmode'));
+
+				        advanced.parents('.field-config').find('.screen-mode').click(function(){
+				        	var valid;
+			                try{
+			                    valid = editor.validateSchema(editor.get());
+			                }catch (e){
+			                    valid = false;
+			                }
+				        	alert(valid)
+				        });
+			    }
+			});
+		});
+	</script>
+	</body>
+</html>
